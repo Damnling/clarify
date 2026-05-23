@@ -1,55 +1,47 @@
-import { useEffect, useState } from 'react'
-import { ReactFlow, Background, Controls } from '@xyflow/react'
+import { useMemo } from 'react'
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  MiniMap,
+} from '@xyflow/react'
 
-import { generateCognitiveMap } from '../lib/cognitiveEngine'
-import { radialLayout } from '../lib/radialLayout'
+import CenterNode from './nodes/CenterNode'
+import ConceptNode from './nodes/ConceptNode'
+import WhyNode from './nodes/WhyNode'
+import HowNode from './nodes/HowNode'
+
+const DetailNode = ({ data }) => {
+  return (
+    <div className="px-3 py-2 rounded-xl bg-slate-700 text-white text-xs shadow-lg max-w-[160px] text-center">
+      {data.label}
+    </div>
+  )
+}
 
 const nodeTypes = {
-    center: ({ data }) => <div className="px-4 py-2 bg-yellow-400 text-black rounded-full">{data.label}</div>,
-  
-    concept: ({ data }) => <div className="px-3 py-2 bg-cyan-500 text-black rounded-lg">{data.label}</div>,
-  
-    why: ({ data }) => <div className="px-2 py-2 bg-purple-500 text-white text-xs rounded">{data.label}</div>,
-  
-    how: ({ data }) => <div className="px-2 py-2 bg-green-500 text-black text-xs rounded">{data.label}</div>,
-  }
+  center: CenterNode,
+  concept: ConceptNode,
+  why: WhyNode,
+  how: HowNode,
+  detail: DetailNode,
+}
 
-export default function GraphCanvas({ text, trigger }) {
-  const [graph, setGraph] = useState({ nodes: [], edges: [] })
-
-  useEffect(() => {
-    const result = generateCognitiveMap(text)
-
-    const positioned = radialLayout(result.nodes)
-
-    const nodes = positioned.map(n => ({
-      id: n.id,
-      type: n.type,
-      position: n.position,
-      data: { label: n.label }
-    }))
-
-    const edges = result.edges.map((e, i) => ({
-      id: `e-${i}`,
-      source: e.from,
-      target: e.to
-    }))
-
-    setGraph({ nodes, edges })
-  }, [text, trigger])
+export default function GraphCanvas({ graph, onNodeClick }) {
+  const memoizedTypes = useMemo(() => nodeTypes, [])
 
   return (
     <div className="w-full h-full bg-[#05070F]">
       <ReactFlow
         nodes={graph.nodes}
         edges={graph.edges}
-        nodeTypes={nodeTypes}
+        nodeTypes={memoizedTypes}
         fitView
-        panOnScroll
-        zoomOnScroll={false}
+        onNodeClick={(event, node) => onNodeClick(node)}
       >
-        <Background color="#1A2540" gap={18} />
+        <Background color="#1A2540" gap={24} />
         <Controls />
+        <MiniMap />
       </ReactFlow>
     </div>
   )
