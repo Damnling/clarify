@@ -1,0 +1,16 @@
+@import '@xyflow/react/dist/style.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  background: #05070F;
+  color: #CBD5E1;
+  font-family: Inter, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
