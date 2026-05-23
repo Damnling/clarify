@@ -1,12 +1,10 @@
 export function computeLayout(nodes) {
-    const centerX = 700
-    const centerY = 400
+    const centerX = 900
+    const centerY = 500
   
     const positioned = []
   
     const center = nodes.find(n => n.type === 'center')
-  
-    if (!center) return nodes
   
     positioned.push({
       ...center,
@@ -18,54 +16,55 @@ export function computeLayout(nodes) {
   
     const concepts = nodes.filter(n => n.type === 'concept')
   
+    const radius = 250 + concepts.length * 45
+  
     concepts.forEach((node, index) => {
       const angle = (Math.PI * 2 * index) / concepts.length
   
       positioned.push({
         ...node,
         position: {
-          x: centerX + Math.cos(angle) * 320,
-          y: centerY + Math.sin(angle) * 240,
+          x: centerX + Math.cos(angle) * radius,
+          y: centerY + Math.sin(angle) * radius,
         },
       })
     })
   
-    const whys = nodes.filter(n => n.type === 'why')
+    const secondary = nodes.filter(
+      n =>
+        n.type === 'why' ||
+        n.type === 'how'
+    )
   
-    whys.forEach(node => {
-      const concept = positioned.find(p => p.id === node.parent)
+    secondary.forEach(node => {
+      const parent = positioned.find(
+        p => p.id === node.parent
+      )
   
-      if (!concept) return
+      if (!parent) return
+  
+      const offset =
+        node.type === 'why'
+          ? -180
+          : 180
   
       positioned.push({
         ...node,
         position: {
-          x: concept.position.x - 140,
-          y: concept.position.y + 120,
+          x: parent.position.x + offset,
+          y: parent.position.y + 140,
         },
       })
     })
   
-    const hows = nodes.filter(n => n.type === 'how')
+    const details = nodes.filter(
+      n => n.type === 'detail'
+    )
   
-    hows.forEach(node => {
-      const concept = positioned.find(p => p.id === node.parent)
-  
-      if (!concept) return
-  
-      positioned.push({
-        ...node,
-        position: {
-          x: concept.position.x + 140,
-          y: concept.position.y + 120,
-        },
-      })
-    })
-  
-    const details = nodes.filter(n => n.type === 'detail')
-  
-    details.forEach(node => {
-      const parent = positioned.find(p => p.id === node.parent)
+    details.forEach((node, index) => {
+      const parent = positioned.find(
+        p => p.id === node.parent
+      )
   
       if (!parent) return
   
@@ -73,7 +72,7 @@ export function computeLayout(nodes) {
         ...node,
         position: {
           x: parent.position.x,
-          y: parent.position.y + 140,
+          y: parent.position.y + 220,
         },
       })
     })

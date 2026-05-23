@@ -28,6 +28,20 @@ export default function App() {
     setSavedMaps(getSavedMindmaps())
   }, [])
 
+  useEffect(() => {
+    function handleShortcuts(e) {
+      if (e.ctrlKey && e.key === 'Enter') {
+        handleGenerate()
+      }
+    }
+
+    window.addEventListener('keydown', handleShortcuts)
+
+    return () => {
+      window.removeEventListener('keydown', handleShortcuts)
+    }
+  })
+
   function handleGenerate() {
     if (!input.trim()) return
 
@@ -37,7 +51,7 @@ export default function App() {
   }
 
   function handleSave() {
-    const name = prompt('Enter mindmap name')
+    const name = prompt('Mindmap name')
 
     if (!name) return
 
@@ -59,7 +73,11 @@ export default function App() {
   }
 
   function handleNodeClick(node) {
-    if (node.type === 'concept') {
+    if (
+      node.type === 'concept' ||
+      node.type === 'why' ||
+      node.type === 'how'
+    ) {
       const expanded = expandNode(graph, node.id)
 
       setGraph(expanded)
@@ -68,6 +86,7 @@ export default function App() {
 
   return (
     <div className="h-screen flex overflow-hidden bg-[#05070F] text-white">
+
       <Sidebar
         input={input}
         setInput={setInput}
@@ -83,6 +102,7 @@ export default function App() {
           onNodeClick={handleNodeClick}
         />
       </div>
+
     </div>
   )
 }

@@ -10,13 +10,21 @@ function extractConcepts(text) {
 
   nouns = nouns
     .filter(word => word.length > 3)
-    .slice(0, 6)
+    .slice(0, 8)
 
   if (nouns.length === 0) {
-    nouns = ['Thinking', 'Ideas', 'Systems', 'Knowledge']
+    nouns = ['Thinking', 'Ideas', 'Systems']
   }
 
   return nouns
+}
+
+function generateWhy(concept, text) {
+  return `${concept} influences the overall direction and structure of the topic.`
+}
+
+function generateHow(concept, text) {
+  return `${concept} can be applied through experimentation, systems, or execution.`
 }
 
 export function generateCognitiveMap(text) {
@@ -29,7 +37,7 @@ export function generateCognitiveMap(text) {
     id: 'center',
     type: 'center',
     data: {
-      label: text.slice(0, 50) || 'Core Concept',
+      label: text.slice(0, 60),
     },
   })
 
@@ -51,7 +59,7 @@ export function generateCognitiveMap(text) {
       type: 'why',
       parent: conceptId,
       data: {
-        label: `Why ${concept} matters`,
+        label: generateWhy(concept, text),
       },
     })
 
@@ -60,7 +68,7 @@ export function generateCognitiveMap(text) {
       type: 'how',
       parent: conceptId,
       data: {
-        label: `How ${concept} is applied`,
+        label: generateHow(concept, text),
       },
     })
 
@@ -68,19 +76,25 @@ export function generateCognitiveMap(text) {
       id: `e-center-${conceptId}`,
       source: 'center',
       target: conceptId,
-      animated: true,
+      type: 'smoothstep',
     })
 
     edges.push({
       id: `e-${conceptId}-${whyId}`,
       source: conceptId,
       target: whyId,
+      style: {
+        stroke: '#F472B6',
+      },
     })
 
     edges.push({
       id: `e-${conceptId}-${howId}`,
       source: conceptId,
       target: howId,
+      style: {
+        stroke: '#5EEAD4',
+      },
     })
   })
 
@@ -95,27 +109,27 @@ export function expandNode(graph, nodeId) {
 
   if (!node) return graph
 
-  const newNodeId = `detail-${Date.now()}`
-
-  const detailNode = {
-    id: newNodeId,
+  const newNode = {
+    id: `detail-${Date.now()}`,
     type: 'detail',
     parent: nodeId,
     data: {
-      label: `${node.data.label} deeper exploration`,
+      label: `Deeper exploration of ${node.data.label}`,
     },
   }
 
-  const newEdge = {
-    id: `e-${nodeId}-${newNodeId}`,
-    source: nodeId,
-    target: newNodeId,
-  }
-
-  const updatedNodes = [...graph.nodes, detailNode]
-
   return {
-    nodes: computeLayout(updatedNodes),
-    edges: [...graph.edges, newEdge],
+    nodes: computeLayout([
+      ...graph.nodes,
+      newNode,
+    ]),
+    edges: [
+      ...graph.edges,
+      {
+        id: `e-${nodeId}-${newNode.id}`,
+        source: nodeId,
+        target: newNode.id,
+      },
+    ],
   }
 }
